@@ -1,6 +1,6 @@
 S1	13/05/2025	3h
 ##  What i did:
-
+lecture du sujet du schema electrique, compreension du schema electrique, commencer a braser la carte
 ## What i understand:
 
 ## What i didn't understand:
