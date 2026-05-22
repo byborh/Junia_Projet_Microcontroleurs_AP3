@@ -5,12 +5,14 @@ Lecture du sujet/schéma électrique. Création de la plateforme d'échange (git
 les sons passe bas/haut
 ## What i didn't understand:
 la manière dont il faut faire les calculs
+
 S2	22/05/2025	3h
 ##  What i did:
-
+Je me suis mis à faire des calculs des préimplificateurs. Je n'ai pas réussi. Mais je sais comment calculer maintenant.
 ## What i understand:
-
+Comment calculer les résistances et condensateurs de notre schema
 ## What i didn't understand:
+Que fait on après avoir fait les calculs ?
 
 S3	27/05/2025	3h
 ##  What i did:
