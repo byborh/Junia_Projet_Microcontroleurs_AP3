@@ -1,9 +1,13 @@
 S1	13/05/2025	3h
 ##  What i did:
+comprehension du sujet et des objectifs des premières séances.
 
 ## What i understand:
+objectif coté numérique et objectif coté analogique.
+en cours trajet du signal dans les éléments
 
 ## What i didn't understand:
+les calculs à faires.
 
 S2	22/05/2025	3h
 ##  What i did:
