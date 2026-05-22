@@ -1,10 +1,10 @@
 S1	13/05/2025	3h
 ##  What i did:
-lecture du sujet du schema electrique, compreension du schema electrique, commencer a braser la carte
+lecture du sujet du schema electrique, compréhension du schema electrique, commencer a braser la carte
 ## What i understand:
-compris commentfonctionne le circuie electrique
+compris comment fonctionne le circuie electrique
 ## What i didn't understand:
-
+comment faire les calcule pour calculer les puissance des résistence 
 S2	22/05/2025	3h
 ##  What i did:
 
