@@ -7,11 +7,11 @@ compris comment fonctionne le circuie electrique
 comment faire les calcule pour calculer les puissance des résistence 
 S2	22/05/2025	3h
 ##  What i did:
-
+souder les composant et désouder les broche car mal mis
 ## What i understand:
-
+comment désouder un element et comment souder un element 
 ## What i didn't understand:
-
+les calcule
 S3	27/05/2025	3h
 ##  What i did:
 
