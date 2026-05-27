@@ -16,9 +16,9 @@ Que fait on après avoir fait les calculs ?
 
 S3	27/05/2025	3h
 ##  What i did:
-
+Calculs des préimplificateurs.
 ## What i understand:
-
+How works amilificateurs
 ## What i didn't understand:
 
 S4	29/05/2025	3h
