@@ -1,6 +1,6 @@
 S1	13/05/2025	3h
 ##  What i did:
-lecture du sujet du schema electrique, compréhension du schema electrique, commencer a braser la carte
+Lecture du sujet/schéma électrique. Création de la plateforme d'échange (github, drive), distribution de droit. compréhension du sujet. Commencer à peine à sy mettre pour les calculs des RC (résistances/condensateurs) et à braser une première pièce
 ## What i understand:
 compris comment fonctionne le circuie electrique
 ## What i didn't understand:
