@@ -16,11 +16,11 @@ Que fait on après avoir fait les calculs ?
 
 S3	27/05/2025	3h
 ##  What i did:
-Calculs des préimplificateurs.
+Calculs des préimplificateurs. help hugo to understand. begin software part
 ## What i understand:
 How works amilificateurs
 ## What i didn't understand:
-
+what i need to do for software part
 S4	29/05/2025	3h
 ##  What i did:
 
