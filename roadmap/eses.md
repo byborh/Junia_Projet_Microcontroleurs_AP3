@@ -33,9 +33,9 @@ La formule de la tension de sortie fournie par ta fiche est :
 ## What i didn't understand:
 
 S3	27/05/2025	3h
-##  What i did:
+##  What i did: Calcul des résitances du stéréo. Pour trouver un resultat de 4.7 pour les 4 resistances et de 10Kohm pour la Rmix4
 
-## What i understand:
+## What i understand:e calcul mathématique en 3 étapes pour ton rapportÉtape 1 : Poser la formule généraleD'après la théorie du montage sommateur inverseur, la formule de la tension de sortie est :$$V_{out\_mix} = -\left( \frac{R_{mix4}}{R_{mix0} + R_{mix1}} \cdot V_{L} + \frac{R_{mix4}}{R_{mix2} + R_{mix3}} \cdot V_{R} \right)$$Étape 2 : Définir les conditions de symétrie et de gainPour que le mixeur traite les deux canaux de la même manière (symétrie) et qu'il ne modifie pas le volume (gain de 1), on pose mathématiquement les conditions suivantes :Condition de symétrie : $R_{mix0} + R_{mix1} = R_{mix2} + R_{mix3}$Condition de gain unitaire : $\frac{R_{mix4}}{R_{mix0} + R_{mix1}} = 1 \implies R_{mix4} = R_{mix0} + R_{mix1}$Étape 3 : L'application numérique (Le choix des composants)Au laboratoire, on choisit une valeur standard de $10\text{ k}\Omega$ pour la résistance de rétroaction ($R_{mix4}$).$$R_{mix4} = 10\text{ k}\Omega$$Pour obtenir cette même valeur sur les branches d'entrée en associant deux résistances identiques, on calcule :$$R_{mix0} + R_{mix1} = 10\text{ k}\Omega$$Si on pose $R_{mix0} = R_{mix1}$, alors :$$2 \times R_{mix0} = 10\text{ k}\Omega \implies R_{mix0} = \frac{10\text{ k}\Omega}{2} = 5\text{ k}\Omega$$La valeur normalisée la plus proche disponible dans la série standard E12 (la boîte de résistances du labo) est $4,7\text{ k}\Omega$.On ré-injecte ces valeurs réelles pour vérifier le calcul final :Branche d'entrée réelle = $4,7\text{ k}\Omega + 4,7\text{ k}\Omega = 9,4\text{ k}\Omega$Gain réel pour chaque canal = $\frac{10\text{ k}\Omega}{9,4\text{ k}\Omega} \approx 1,06$
 
 ## What i didn't understand:
 
