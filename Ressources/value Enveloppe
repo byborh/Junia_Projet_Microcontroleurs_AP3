@@ -1,0 +1,24 @@
+Enveloppe 1:
+R1:1000 ohm
+C1:22 microF
+
+
+Enveloppe 2:
+R2:8200 ohm
+C2:33 microF
+
+
+Enveloppe 3:
+R3:1000 ohm
+C3:22 microF
+
+R2:8200 ohm
+C2:33 microF
+
+
+Enveloppe 4:
+R2:8200 ohm
+C2:33 microF
+
+R2:8200 ohm
+C2:33 microF
