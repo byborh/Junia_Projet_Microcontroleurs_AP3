@@ -12,18 +12,19 @@ souder les composant et désouder les broche car mal mis
 comment désouder un element et comment souder un element 
 ## What i didn't understand:
 les calcule
+
 S3	27/05/2025	3h
 ##  What i did:
-
+continuer de faire les soudure + aider mais camarade pour des calcule est le chois des composant 
 ## What i understand:
 
 ## What i didn't understand:
 
 S4	29/05/2025	3h
 ##  What i did:
-
+refaire certaine soudure car mal faite vu avec le prof
 ## What i understand:
-
+j'ai vu comment bien souder avec le prof
 ## What i didn't understand:
 
 S5	03/06/2025	3h
