@@ -22,9 +22,9 @@ continuer de faire les soudure + aider mais camarade pour des calcule est le cho
 
 S4	29/05/2025	3h
 ##  What i did:
-refaire certaine soudure car mal faite vu avec le prof
+refaire certaine soudure car mal faite vu avec le prof test de la carte electronique du microcentroleur des leds des resistance pour voire d'ou venez le probleme commencer a faire la partie software
 ## What i understand:
-j'ai vu comment bien souder avec le prof
+j'ai vu comment bien souder avec le prof comment fonctionne le generateur est les different element de teste
 ## What i didn't understand:
 
 S5	03/06/2025	3h
