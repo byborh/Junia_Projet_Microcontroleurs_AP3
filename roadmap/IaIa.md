@@ -29,9 +29,9 @@ j'ai vu comment bien souder avec le prof comment fonctionne le generateur est le
 
 S5	03/06/2025	3h
 ##  What i did:
-
+calculer le Vccin avec l'osciloscope brassage des bouton est des resistance/condensateur calculer 
 ## What i understand:
-
+comment trouver Vccin avec l'osciloscope 
 ## What i didn't understand:
 
 S6	05/06/2025	3h
