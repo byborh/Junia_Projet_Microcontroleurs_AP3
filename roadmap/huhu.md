@@ -11,21 +11,23 @@ les calculs à faires.
 
 S2	22/05/2025	3h
 ##  What i did:
-
+Travail sur les filtres
 ## What i understand:
-
+pas grand chose
 ## What i didn't understand:
+comment bien calculer les filtres
 
 S3	27/05/2025	3h
 ##  What i did:
-
+travail sur les filtres
 ## What i understand:
-
+pas grand chose
 ## What i didn't understand:
+comment bien calculer les filtres
 
 S4	29/05/2025	3h
 ##  What i did:
-finir calcule des filtres et calcule des valeurs d'enveloppes
+finir les calcules des filtres et calcule des valeurs d'enveloppes
 
 ## What i understand:
 comment calculer les valeurs d'enveloppes
