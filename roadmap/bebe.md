@@ -30,7 +30,7 @@ S4	29/05/2025	3h
 
 S5	03/06/2025	3h
 ##  What i did:
-
+j'ai brasé quelques résistances et conensateurs dans la carte. Mésuré avec l'oscilloscope le Vccin pour mésuré les dernières résistances à calculer du préimplificateur.
 ## What i understand:
 
 ## What i didn't understand:
