@@ -45,8 +45,13 @@ il faut faire l'inverse de la frequec epour avoir la période et prendre la plus
 
 S5	03/06/2025	3h
 ##  What i did:
+vérification des valeurs calculé, ajustement des valeurs d'enveloppes
+calcules des valeurs du pull out
 
 ## What i understand:
+explication de valeurs d'enveloppe, a quoi elles servent et les catégories 
+explication de ce qu'est les pull out, a quoi ca sert, comment ca marche:
+les pulls out servent à faire passer une valeur de 1 lorsqu'un bouton est relever. Pour ce faire il va passer du courant. La valeur exacte dépend de certains critère comme le bruit du circuit, la vitesse et conso du circuit.
 
 ## What i didn't understand:
 
