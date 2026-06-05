@@ -5,17 +5,57 @@
  * -------------------------------------------------------------- */
 
 #include <xc.h>
+#include <stdint.h>
 
 // Configuration materielle du PIC :
 #pragma config FEXTOSC = OFF           // Pas de source d'horloge externe
 #pragma config RSTOSC = HFINTOSC_64MHZ // Horloge interne de 64 MHz
 #pragma config WDTE = OFF              // Désactiver le watchdog
 
+#pragma config MCLRE = EXTMCLR         // Broche MCLR active (reset externe)
+#pragma config LVP = OFF               // Programmation basse tension desactivee
+
 #define _XTAL_FREQ 64000000 // Frequence d'horloge - necessaire aux macros de delay (_delay(N) ; __delay_us(N) ; __delay_ms(N)))
 
-// Définition des masques, macros, etc. :
-// TODO
+//  Detecteurs d'enveloppe (entrees ADC) :
+//     basses        = OUT_ENV_1 = RA5 = AN5
+//     bas-mediums   = OUT_ENV_2 = RA4 = AN4
+//     hauts-mediums = OUT_ENV_3 = RA3 = AN3
+//     aigus         = OUT_ENV_4 = RA2 = AN2
+#define CH_BASSES     5   // AN5 | OUT_ENv_1
+#define CH_BAS_MED    4   // AN4 | OUT_ENv_2
+#define CH_HAUT_MED   3   // AN3 | OUT_ENv_3
+#define CH_AIGUS      2   // AN2 | OUT_ENv_4
 
+
+// ============================================================================
+//  Definition des broches (voir schematic.pdf)
+// ============================================================================
+//  CMD_MATRIX = RB5  (data matrice, pilotee en ASM)
+//  LED_M      = RB4  (LED "master" / power)
+//  LED_0..7   = RC0..RC7 (8 LEDs de test = PORTC)
+//  BP0        = RA7  (bouton 0)
+//  BP1        = RA6  (bouton 1)
+
+
+#define LED_M_ON()    (LATB |= 0x10)   // RB4
+#define LED_M_OFF()   (LATB &= ~0x10)
+
+#define BP0           (PORTAbits.RA7)  // 0 = appuye (pull-up)
+#define BP1           (PORTAbits.RA6)
+
+// ============================================================================
+//  Parametres d'affichage
+// ============================================================================
+#define NB_LEDS       64
+#define BAR_HEIGHT    8        // 8 LEDs de haut
+#define INTENSITY     24       // intensite des couleurs : JAMAIS 255 ! (~16-32)
+
+// Index des 4 octets dans LED_MATRIX pour chaque LED (ordre d'envoi G,R,B,W)
+#define OFF_G  0
+#define OFF_R  1
+#define OFF_B  2
+#define OFF_W  3
 
 // Déclaration de fonctions et variables globales permettant au code C et à l'asm de les partager
 // Une même fonction ou variable côté asm est préfixée par un underscore, et ne l'est pas côté C
