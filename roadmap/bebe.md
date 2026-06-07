@@ -32,9 +32,9 @@ j'ai vu comment bien souder avec le prof comment fonctionne le generateur est le
 
 S5	03/06/2025	3h
 ##  What i did:
-
+la partie software (notament le code en C). j'ai pris un cours par le prof qui nous a expliqué tout les concepts nécessaires. j'ai aidé à braisé les derniers pièces à Iaia
 ## What i understand:
-
+comment fonctionne le code sur notre carte
 ## What i didn't understand:
 
 S6	05/06/2025	3h
