@@ -38,5 +38,72 @@ _TX_64LEDS:
 
     ; Envoie la commande pour piloter chacune des 64 LEDs
     ; TODO
+    ; Envoie la commande pour piloter chacune des 64 LEDs (256 octets)
+    
+    ; 1. Initialisation des compteurs
+    ; On utilise des registres systèmes libres (PRODL, PRODH, TABLAT) pour ne pas gêner le compilateur C
+    CLRF PRODL, 0       ; PRODL sera notre compteur d'octets. Init à 0 (bouclera 256 fois)
+
+_next_byte:
+    MOVF POSTINC0, 0, 0 ; WREG = charge l'octet actuel et incrémente le pointeur (1 cycle)
+    MOVWF TABLAT, 0     ; TABLAT = copie l'octet à envoyer ici (notre zone de travail)
+    MOVLW 8             ; WREG = 8
+    MOVWF PRODH, 0      ; PRODH = notre compteur de bits (8 bits par octet)
+
+_bit_loop:
+    ; --- DEBUT DU BIT (Total : 20 cycles = 1,25 µs) ---
+    BSF LATC, 0, 0      ; [1 cycle]  BROCHE A L'ETAT HAUT (Ajuste "LATC, 0" selon ton câblage !)
+    RLCF TABLAT, 1, 0   ; [1 cycle]  Décale l'octet vers la gauche. Le bit fort tombe dans le Carry (C)
+    BTFSS STATUS, 0, 0  ; [1 ou 2]   Teste le Carry. Si C=1, on saute la ligne suivante.
+    BRA _bit_is_zero    ; [2 cycles] Si C=0, on part vers le code du bit "0"
+
+_bit_is_one:
+    ; Si on est ici, on est au cycle 4. Pour un "1", la broche doit rester HAUTE 13 cycles.
+    ; Il nous manque 9 cycles d'attente.
+    NOP                 ; [5]
+    NOP                 ; [6]
+    NOP                 ; [7]
+    NOP                 ; [8]
+    NOP                 ; [9]
+    NOP                 ; [10]
+    NOP                 ; [11]
+    NOP                 ; [12]
+    NOP                 ; [13]
+    BCF LATC, 0, 0      ; [1 cycle] (Cycle 14) BROCHE A L'ETAT BAS
+    
+    ; La broche doit rester BASSE pendant 7 cycles (pour atteindre 20)
+    NOP                 ; [15]
+    NOP                 ; [16]
+    NOP                 ; [17]
+    DECFSZ PRODH, 1, 0  ; [1 ou 2] Décrémente le compteur de bits. Saute si = 0.
+    BRA _bit_loop       ; [2 cycles] (Cycle 19-20) Retour au début pour le bit suivant !
+    BRA _byte_done      ; [2 cycles] Si c'était le dernier bit, on sort.
+
+_bit_is_zero:
+    ; Si on est ici, on est au cycle 6 (car le saut BRA a pris 2 cycles). 
+    ; Pour un "0", la broche doit être HAUTE pendant 5 cycles. C'est le moment de la baisser !
+    BCF LATC, 0, 0      ; [1 cycle] (Cycle 6) BROCHE A L'ETAT BAS
+    
+    ; La broche doit rester BASSE pendant 15 cycles (pour atteindre 20)
+    NOP                 ; [7]
+    NOP                 ; [8]
+    NOP                 ; [9]
+    NOP                 ; [10]
+    NOP                 ; [11]
+    NOP                 ; [12]
+    NOP                 ; [13]
+    NOP                 ; [14]
+    NOP                 ; [15]
+    NOP                 ; [16]
+    NOP                 ; [17]
+    DECFSZ PRODH, 1, 0  ; [1 ou 2] Décrémente le compteur de bits. Saute si = 0.
+    BRA _bit_loop       ; [2 cycles] (Cycle 19-20) Retour au début pour le bit suivant !
+    BRA _byte_done      ; [2 cycles] Si c'était le dernier bit, on sort.
+
+_byte_done:
+    DECFSZ PRODL, 1, 0  ; Décrémente le compteur d'octets. (256 itérations)
+    BRA _next_byte      ; S'il reste des octets, on charge le suivant
+    
+    RETURN              ; Fin de la fonction !
 
     RETURN
