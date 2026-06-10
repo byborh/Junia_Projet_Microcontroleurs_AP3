@@ -195,6 +195,17 @@ void main(void) {
     LED_M_OFF(); __delay_ms(200);
     LED_M_ON();
 
+// TODO: à supprimer plus tard, mais ça permet juste de vérifier si ça fonctionne ou non.
+#define DEMO_TEST 1
+#if DEMO_TEST
+    while (1) {
+        for (int i = 0; i < 8; i++) {
+            LATC = (unsigned char)(0x01 << i);   // allume LED i sur PORTC
+            __delay_ms(125);
+        }
+    }
+#endif
+
 
     /* Affichage matrice eteinte au depart */
     clear_matrix();
