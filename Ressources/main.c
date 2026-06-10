@@ -72,6 +72,20 @@ extern void TX_64LEDS(void); // Fonction définie dans tx.asm ; Fonction permett
 volatile char LED_MATRIX [256] ; // Definition d'une matrice de 64 x 4 octets contenant les composantes R/G/B/W de chaque LED (1 octet/couleur/LED)
 volatile const char * pC = LED_MATRIX; // Pointeur vers LED_MATRIX
 
+// ============================================================================
+//  Prototypes
+//  On ANNONCE ici toutes les fonctions. Le compilateur connait alors leur
+//  signature (type de retour + arguments) avant de rencontrer le moindre
+//  appel : l'ordre des definitions plus bas n'a donc plus aucune importance.
+// ============================================================================
+static uint16_t adc_read(uint8_t channel);
+static uint8_t  adc_to_level(uint16_t value);
+static void     build_frame(const uint8_t level[4]);
+static uint8_t  led_index(uint8_t col, uint8_t row);
+static void     set_led(uint8_t idx, uint8_t g, uint8_t r, uint8_t b, uint8_t w);
+static void     clear_matrix(void);
+static void     set_led_by_height(uint8_t idx, uint8_t row);
+
 // Lit un canal ADC, retourne 0..1023
 static uint16_t adc_read(uint8_t channel) {
     ADPCH = channel;        // selection du canal
@@ -103,6 +117,42 @@ static void build_frame(const uint8_t level[4]) {
     }
 }
 
+// ============================================================================
+//  Outils matrice : conversion (colonne, ligne) -> index de LED
+// ============================================================================
+// La matrice est cablee en colonnes de 8 (cf. sujet, fig. ordre des LEDs) :
+//   LED n°1..8   = colonne 0 (ligne 0 en bas -> ligne 7 en haut)
+//   LED n°9..16  = colonne 1, etc.
+// Index 0-based de la LED en colonne c (0..7), ligne r (0..7) :
+static uint8_t led_index(uint8_t col, uint8_t row) {
+    return (uint8_t)(col * 8u + row);
+}
+
+// Ecrit les 4 octets G/R/B/W d'une LED dans la trame
+static void set_led(uint8_t idx, uint8_t g, uint8_t r, uint8_t b, uint8_t w) {
+    uint16_t base = (uint16_t)idx * 4u;
+    LED_MATRIX[base + OFF_G] = (char)g;
+    LED_MATRIX[base + OFF_R] = (char)r;
+    LED_MATRIX[base + OFF_B] = (char)b;
+    LED_MATRIX[base + OFF_W] = (char)w;
+}
+
+static void clear_matrix(void) {
+    for (uint16_t i = 0; i < 256; i++) {
+        LED_MATRIX[i] = 0;
+    }
+}
+
+// Couleur d'une LED selon sa hauteur (degrade vert -> jaune -> rouge)
+static void set_led_by_height(uint8_t idx, uint8_t row) {
+    if (row <= 3) {
+        set_led(idx, INTENSITY, 0, 0, 0);            // vert
+    } else if (row <= 5) {
+        set_led(idx, INTENSITY, INTENSITY, 0, 0);    // jaune (vert + rouge)
+    } else {
+        set_led(idx, 0, INTENSITY, 0, 0);            // rouge
+    }
+}
 
 
 // - Fonction main ----------------------------------------------------------------------
@@ -147,9 +197,7 @@ void main(void) {
 
 
     /* Affichage matrice eteinte au depart */
-    for (uint16_t i = 0; i < 256; i++) {
-        LED_MATRIX[i] = 0;
-    }
+    clear_matrix();
     TX_64LEDS();
 
 
@@ -177,42 +225,4 @@ void main(void) {
     }
 
     return;
-}
-
-
-// ============================================================================
-//  Outils matrice : conversion (colonne, ligne) -> index de LED
-// ============================================================================
-// La matrice est cablee en colonnes de 8 (cf. sujet, fig. ordre des LEDs) :
-//   LED n°1..8   = colonne 0 (ligne 0 en bas -> ligne 7 en haut)
-//   LED n°9..16  = colonne 1, etc.
-// Index 0-based de la LED en colonne c (0..7), ligne r (0..7) :
-static uint8_t led_index(uint8_t col, uint8_t row) {
-    return (uint8_t)(col * 8u + row);
-}
-
-// Ecrit les 4 octets G/R/B/W d'une LED dans la trame
-static void set_led(uint8_t idx, uint8_t g, uint8_t r, uint8_t b, uint8_t w) {
-    uint16_t base = (uint16_t)idx * 4u;
-    LED_MATRIX[base + OFF_G] = (char)g;
-    LED_MATRIX[base + OFF_R] = (char)r;
-    LED_MATRIX[base + OFF_B] = (char)b;
-    LED_MATRIX[base + OFF_W] = (char)w;
-}
-
-static void clear_matrix(void) {
-    for (uint16_t i = 0; i < 256; i++) {
-        LED_MATRIX[i] = 0;
-    }
-}
-
-// Couleur d'une LED selon sa hauteur (degrade vert -> jaune -> rouge)
-static void set_led_by_height(uint8_t idx, uint8_t row) {
-    if (row <= 3) {
-        set_led(idx, INTENSITY, 0, 0, 0);            // vert
-    } else if (row <= 5) {
-        set_led(idx, INTENSITY, INTENSITY, 0, 0);    // jaune (vert + rouge)
-    } else {
-        set_led(idx, 0, INTENSITY, 0, 0);            // rouge
-    }
 }

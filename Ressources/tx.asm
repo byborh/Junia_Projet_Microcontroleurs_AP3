@@ -36,10 +36,8 @@ _TX_64LEDS:
     ; Désormais, dès l'exécution de l'instruction suivante, la valeur pointée par <FSR0H-FSR0L> est chargée dans WREG, et <FSR0H-FSR0L> est incrémenté :
     ; MOVF POSTINC0, 0, 0
 
-    ; Envoie la commande pour piloter chacune des 64 LEDs
-    ; TODO
     ; Envoie la commande pour piloter chacune des 64 LEDs (256 octets)
-    
+
     ; 1. Initialisation des compteurs
     ; On utilise des registres systèmes libres (PRODL, PRODH, TABLAT) pour ne pas gêner le compilateur C
     CLRF PRODL, 0       ; PRODL sera notre compteur d'octets. Init à 0 (bouclera 256 fois)
@@ -52,7 +50,7 @@ _next_byte:
 
 _bit_loop:
     ; --- DEBUT DU BIT (Total : 20 cycles = 1,25 µs) ---
-    BSF LATC, 0, 0      ; [1 cycle]  BROCHE A L'ETAT HAUT (Ajuste "LATC, 0" selon ton câblage !)
+    BSF LATB, 5, 0      ; [1 cycle]  BROCHE A L'ETAT HAUT (RB5 = CMD_MATRIX)
     RLCF TABLAT, 1, 0   ; [1 cycle]  Décale l'octet vers la gauche. Le bit fort tombe dans le Carry (C)
     BTFSS STATUS, 0, 0  ; [1 ou 2]   Teste le Carry. Si C=1, on saute la ligne suivante.
     BRA _bit_is_zero    ; [2 cycles] Si C=0, on part vers le code du bit "0"
@@ -69,7 +67,7 @@ _bit_is_one:
     NOP                 ; [11]
     NOP                 ; [12]
     NOP                 ; [13]
-    BCF LATC, 0, 0      ; [1 cycle] (Cycle 14) BROCHE A L'ETAT BAS
+    BCF LATB, 5, 0      ; [1 cycle] (Cycle 14) BROCHE A L'ETAT BAS
     
     ; La broche doit rester BASSE pendant 7 cycles (pour atteindre 20)
     NOP                 ; [15]
@@ -82,7 +80,7 @@ _bit_is_one:
 _bit_is_zero:
     ; Si on est ici, on est au cycle 6 (car le saut BRA a pris 2 cycles). 
     ; Pour un "0", la broche doit être HAUTE pendant 5 cycles. C'est le moment de la baisser !
-    BCF LATC, 0, 0      ; [1 cycle] (Cycle 6) BROCHE A L'ETAT BAS
+    BCF LATB, 5, 0      ; [1 cycle] (Cycle 6) BROCHE A L'ETAT BAS
     
     ; La broche doit rester BASSE pendant 15 cycles (pour atteindre 20)
     NOP                 ; [7]
@@ -105,5 +103,3 @@ _byte_done:
     BRA _next_byte      ; S'il reste des octets, on charge le suivant
     
     RETURN              ; Fin de la fonction !
-
-    RETURN
