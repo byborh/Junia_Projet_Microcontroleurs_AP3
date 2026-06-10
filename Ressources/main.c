@@ -72,38 +72,147 @@ extern void TX_64LEDS(void); // Fonction définie dans tx.asm ; Fonction permett
 volatile char LED_MATRIX [256] ; // Definition d'une matrice de 64 x 4 octets contenant les composantes R/G/B/W de chaque LED (1 octet/couleur/LED)
 volatile const char * pC = LED_MATRIX; // Pointeur vers LED_MATRIX
 
+// Lit un canal ADC, retourne 0..1023
+static uint16_t adc_read(uint8_t channel) {
+    ADPCH = channel;        // selection du canal
+    __delay_us(5);          // temps d'acquisition (charge du S&H)
+    ADCON0 |= 0x01;         // ADGO = 1 : demarre la conversion
+    while (ADCON0 & 0x01) { // attend la fin (ADGO repasse a 0)
+        ;
+    }
+    return (uint16_t)(((uint16_t)ADRESH << 8) | ADRESL);
+}
+
+// Convertit une valeur ADC (0..1023) en hauteur de barre (0..8)
+static uint8_t adc_to_level(uint16_t value) {
+    uint8_t lvl = (uint8_t)((value * (BAR_HEIGHT + 1u)) / 1024u); // 0..8
+    if (lvl > BAR_HEIGHT) lvl = BAR_HEIGHT;
+    return lvl;
+}
+
+// Construit la trame : chaque bande occupe 2 colonnes, hauteur = niveau
+static void build_frame(const uint8_t level[4]) {
+    clear_matrix();
+    for (uint8_t band = 0; band < 4; band++) {
+        uint8_t lvl = level[band];
+        for (uint8_t col = (uint8_t)(band * 2); col < (uint8_t)(band * 2 + 2); col++) {
+            for (uint8_t row = 0; row < lvl; row++) {
+                set_led_by_height(led_index(col, row), row);
+            }
+        }
+    }
+}
+
+
 
 // - Fonction main ----------------------------------------------------------------------
 void main(void) {
     /* Configuration des entrées / sorties */
-    // TODO
+    // init adc / gpio
+    // --- Sorties LEDs de test GPIO ---
+    TRISC  = 0x00;          // RC0..RC7 = LED_0..7 en sortie
+    ANSELC = 0x00;          // numerique
+    LATC   = 0x00;          // eteintes
 
-    /* Corps du programme */
-    // TODO
+    // --- RB4 (LED_M) et RB5 (CMD_MATRIX) en sortie numerique ---
+    TRISB  &= ~0x30;        // RB4, RB5 = sortie
+    ANSELB &= ~0x30;        // numerique
+    LATB   &= ~0x30;        // niveau bas
 
-    /* Code pour vérification du bon fonctionnement de la partir uC (à retirer par la suite) : === DEMO CODE */
+    // --- Boutons BP0 = RA7, BP1 = RA6 en entree numerique ---
+    TRISA  |= 0xC0;         // RA6, RA7 = entree
+    ANSELA &= ~0xC0;        // numerique
+    WPUA   |= 0xC0;         // pull-up internes (bouton vers GND -> 0 si appuye)
 
-    // Initialisation des LEDs =================================================================== DEMO CODE
-    TRISB &= 0xEF; // LED_MASTER : OUTPUT -------------------------------------------------------- DEMO CODE
-    TRISC &= 0x00; // LED0-7     : OUTPUT -------------------------------------------------------- DEMO CODE
 
-    LATB &= 0xEF; // Eteindre LEDM   ------------------------------------------------------------- DEMO CODE
-    LATC  = 0x00; // Eteindre LED0-7 ------------------------------------------------------------- DEMO CODE
+    // --- Broches analogiques AN2..AN5 (RA2..RA5) en entree analogique ---
+    TRISA  |= 0x3C;         // RA2..RA5 = entree
+    ANSELA |= 0x3C;         // analogique
 
-    // Blink sur LEDM : ========================================================================== DEMO CODE
-    LATB |= 0x10;    // Allumer LEDM   ----------------------------------------------------------- DEMO CODE
-    __delay_ms(500); // Macro de délai ----------------------------------------------------------- DEMO CODE
-    LATB &= 0xEF;    // Eteindre LEDM  ----------------------------------------------------------- DEMO CODE
-    __delay_ms(500); // Macro de délai ----------------------------------------------------------- DEMO CODE
-    LATB |= 0x10;    // Allumer LEDM   ----------------------------------------------------------- DEMO CODE
+    // --- Module ADC ---
+    // ADCON0 : ADON=1 (b7) | ADCS=1 (b4, horloge FRC dediee) | ADFM=1 (b2, justifie a droite)
+    ADCON0 = 0x80 | 0x10 | 0x04;   // = 0x94
+    // ADREF par defaut : Vref+ = VDD, Vref- = VSS
+    ADREF  = 0x00;
+    // Pas d'acquisition automatique : on attend manuellement avant chaque conversion
+    ADACQ  = 0x00;
+    ADCON1 = 0x00;
+    ADCON2 = 0x00;          // mode basique (pas de calcul/moyenne materielle)
+    ADCON3 = 0x00;
 
-    // Chenillard : ============================================================================== DEMO CODE
-    while(1){ //---------------------------------------------------------------------------------- DEMO CODE
-        for (int i=0; i<8; i++){ // -------------------------------------------------------------- DEMO CODE
-            LATC = 0x01 << i;    // Commander les LEDs de test sur le PORTC ---------------------- DEMO CODE
-            __delay_ms(125);     // Macro de délai ----------------------------------------------- DEMO CODE
-        } // ------------------------------------------------------------------------------------- DEMO CODE
-    } // ----------------------------------------------------------------------------------------- DEMO CODE
+    /* Petit test au demarrage : la LED master clignote (montre que c'est sous tension) */
+    LED_M_ON();  __delay_ms(200);
+    LED_M_OFF(); __delay_ms(200);
+    LED_M_ON();
+
+
+    /* Affichage matrice eteinte au depart */
+    for (uint16_t i = 0; i < 256; i++) {
+        LED_MATRIX[i] = 0;
+    }
+    TX_64LEDS();
+
+
+    /* Corps du programme : boucle vumetre ------------------------------------ */
+    uint8_t level[4];
+    while (1) {
+        // 1) Acquisition des 4 bandes
+        uint16_t v_basses  = adc_read(CH_BASSES);
+        uint16_t v_bas_med = adc_read(CH_BAS_MED);
+        uint16_t v_haut_med= adc_read(CH_HAUT_MED);
+        uint16_t v_aigus   = adc_read(CH_AIGUS);
+
+        // 2) Traitement : conversion en hauteur de barre
+        level[0] = adc_to_level(v_basses);
+        level[1] = adc_to_level(v_bas_med);
+        level[2] = adc_to_level(v_haut_med);
+        level[3] = adc_to_level(v_aigus);
+
+        // 3) Construction de la trame puis envoi a la matrice (ASM)
+        build_frame(level);
+        TX_64LEDS();
+
+        // 4) Cadence de rafraichissement (~50 Hz) ; laisse aussi la ligne au repos (>50us)
+        __delay_ms(20);
+    }
 
     return;
+}
+
+
+// ============================================================================
+//  Outils matrice : conversion (colonne, ligne) -> index de LED
+// ============================================================================
+// La matrice est cablee en colonnes de 8 (cf. sujet, fig. ordre des LEDs) :
+//   LED n°1..8   = colonne 0 (ligne 0 en bas -> ligne 7 en haut)
+//   LED n°9..16  = colonne 1, etc.
+// Index 0-based de la LED en colonne c (0..7), ligne r (0..7) :
+static uint8_t led_index(uint8_t col, uint8_t row) {
+    return (uint8_t)(col * 8u + row);
+}
+
+// Ecrit les 4 octets G/R/B/W d'une LED dans la trame
+static void set_led(uint8_t idx, uint8_t g, uint8_t r, uint8_t b, uint8_t w) {
+    uint16_t base = (uint16_t)idx * 4u;
+    LED_MATRIX[base + OFF_G] = (char)g;
+    LED_MATRIX[base + OFF_R] = (char)r;
+    LED_MATRIX[base + OFF_B] = (char)b;
+    LED_MATRIX[base + OFF_W] = (char)w;
+}
+
+static void clear_matrix(void) {
+    for (uint16_t i = 0; i < 256; i++) {
+        LED_MATRIX[i] = 0;
+    }
+}
+
+// Couleur d'une LED selon sa hauteur (degrade vert -> jaune -> rouge)
+static void set_led_by_height(uint8_t idx, uint8_t row) {
+    if (row <= 3) {
+        set_led(idx, INTENSITY, 0, 0, 0);            // vert
+    } else if (row <= 5) {
+        set_led(idx, INTENSITY, INTENSITY, 0, 0);    // jaune (vert + rouge)
+    } else {
+        set_led(idx, 0, INTENSITY, 0, 0);            // rouge
+    }
 }
