@@ -47,8 +47,8 @@ _b7_1:
     BRA _b6_start       ; [2] Cycles 19-20
 _b7_0:
     BCF LATB, 5, 0      ; [1] Cycle 6
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [12] Cycles 7-18
-    ; Le code "tombe" directement dans _b6_start (Cycles 19-20 implicites)
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [14] Cycles 7-20
+    ; Le code "tombe" dans _b6_start au cycle 21 (= cycle 1 du bit suivant)
 
 _b6_start:
     ; =========================================================
@@ -65,7 +65,7 @@ _b6_1:
     BRA _b5_start       ; [2] Cycles 19-20
 _b6_0:
     BCF LATB, 5, 0      ; [1] Cycle 6
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [12] Cycles 7-18
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [14] Cycles 7-20
 
 _b5_start:
     ; =========================================================
@@ -82,7 +82,7 @@ _b5_1:
     BRA _b4_start
 _b5_0:
     BCF LATB, 5, 0
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b4_start:
     ; =========================================================
@@ -99,7 +99,7 @@ _b4_1:
     BRA _b3_start
 _b4_0:
     BCF LATB, 5, 0
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b3_start:
     ; =========================================================
@@ -116,7 +116,7 @@ _b3_1:
     BRA _b2_start
 _b3_0:
     BCF LATB, 5, 0
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b2_start:
     ; =========================================================
@@ -133,7 +133,7 @@ _b2_1:
     BRA _b1_start
 _b2_0:
     BCF LATB, 5, 0
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b1_start:
     ; =========================================================
@@ -150,7 +150,7 @@ _b1_1:
     BRA _b0_start
 _b1_0:
     BCF LATB, 5, 0
-    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b0_start:
     ; =========================================================
