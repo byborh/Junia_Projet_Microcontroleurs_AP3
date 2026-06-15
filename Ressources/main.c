@@ -222,19 +222,30 @@ void main(void) {
 #define TEST_R      INTENSITY   // rouge
 #define TEST_B      0           // bleu
 #define TEST_W      0           // blanc
-#if TEST_MATRIX
+    /* --- MODE OSCILLO : envoie la trame en boucle rapide pour scoper RB5 ---
+     * Mettre TEST_SCOPE a 0 pour revenir au test visuel TEST_MATRIX. */
+#define TEST_SCOPE 0
+#if TEST_SCOPE
+    for (uint8_t i = 0; i < TEST_NLEDS; i++) {
+        set_led(i, TEST_G, TEST_R, TEST_B, TEST_W);
+    }
     while (1) {
-        // Prepare la trame (rouge sur TEST_NLEDS LEDs)
-        for (uint8_t i = 0; i < TEST_NLEDS; i++) {
-            set_led(i, TEST_G, TEST_R, TEST_B, TEST_W);
-        }
+        TX_64LEDS();
+        __delay_us(80);          // petit reset (>50us) puis on renvoie -> facile a declencher
+    }
+#endif
 
-        LATC = 0xFF;             // PORTC ALLUME  (= "j'entre dans TX")
-        __delay_ms(500);         // visible 500 ms -> sert AUSSI a chronometrer l'horloge
-
-        TX_64LEDS();             // envoi a la matrice
-
-        LATC = 0x00;             // PORTC ETEINT  (= "TX a RENDU la main")
+#if TEST_MATRIX
+    // Motif de diagnostic : 4 couleurs distinctes sur les 4 premieres LEDs,
+    // tout le reste eteint. On regarde COMMENT ca s'affiche.
+    clear_matrix();
+    set_led(0, 0,         INTENSITY, 0,         0);          // LED 0 = ROUGE
+    set_led(1, INTENSITY, 0,         0,         0);          // LED 1 = VERT
+    set_led(2, 0,         0,         INTENSITY, 0);          // LED 2 = BLEU
+    set_led(3, 0,         0,         0,         INTENSITY);  // LED 3 = BLANC
+    while (1) {
+        TX_64LEDS();             // renvoie la meme trame en continu
+        LATC ^= 0xFF;            // PORTC clignote = preuve que la boucle tourne
         __delay_ms(500);
     }
 #endif
