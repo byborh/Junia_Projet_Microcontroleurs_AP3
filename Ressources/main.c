@@ -49,7 +49,7 @@
 // ============================================================================
 #define NB_LEDS       64
 #define BAR_HEIGHT    8        // 8 LEDs de haut
-#define INTENSITY     24       // intensite des couleurs : JAMAIS 255 ! (~16-32)
+#define INTENSITY     8        // BAISSE pour tester l'hypothese courant/alim (etait 24)
 
 // Index des 4 octets dans LED_MATRIX pour chaque LED (ordre d'envoi G,R,B,W)
 #define OFF_G  0
@@ -166,6 +166,7 @@ void main(void) {
     // --- RB4 (LED_M) et RB5 (CMD_MATRIX) en sortie numerique ---
     TRISB  &= ~0x30;        // RB4, RB5 = sortie
     ANSELB &= ~0x30;        // numerique
+    ODCONB &= ~0x30;        // push-pull (PAS open-drain) -> drive franc jusqu'a VDD
     LATB   &= ~0x30;        // niveau bas
 
     // --- Boutons BP0 = RA7, BP1 = RA6 en entree numerique ---
@@ -216,12 +217,28 @@ void main(void) {
      *    TEST_NLEDS   : nombre de LEDs allumees (1 = ne teste que la 1ere LED)
      *    TEST_G/R/B/W : composantes couleur (jamais 255 ; ~16-32)
      * ====================================================================== */
-#define TEST_MATRIX 1
+#define TEST_MATRIX 1           // 1 = test rouge<->noir (deterministe) ; 0 = vumetre sonore
 #define TEST_NLEDS  1           // T2 : on n'allume QUE la 1ere LED (rouge)
 #define TEST_G      0           // vert  (0 = test SANS vert)
 #define TEST_R      INTENSITY   // rouge
 #define TEST_B      0           // bleu
 #define TEST_W      0           // blanc
+
+    /* --- TEST BROCHE RB5 : verifie au MULTIMETRE que la data bascule ---
+     * RB5 (pin 26) alterne ~5V / ~0V toutes les 2 s, EN PHASE avec PORTC.
+     * Mesurer RB5 au multimetre (mode DC). Mettre TEST_PIN a 0 ensuite. */
+#define TEST_PIN 0
+#if TEST_PIN
+    while (1) {
+        LATB |=  0x20;   // RB5 = HAUT (~5V)
+        LATC  = 0xFF;    // temoin visible PORTC
+        __delay_ms(2000);
+        LATB &= ~0x20;   // RB5 = BAS (~0V)
+        LATC  = 0x00;
+        __delay_ms(2000);
+    }
+#endif
+
     /* --- MODE OSCILLO : envoie la trame en boucle rapide pour scoper RB5 ---
      * Mettre TEST_SCOPE a 0 pour revenir au test visuel TEST_MATRIX. */
 #define TEST_SCOPE 0
@@ -242,7 +259,6 @@ void main(void) {
         // Phase A : TOUT ETEINT (on envoie des zeros)
         clear_matrix();
         TX_64LEDS();
-        LATC = 0xFF;             // temoin PORTC
         __delay_ms(1000);
 
         // Phase B : TOUT ROUGE
@@ -250,7 +266,6 @@ void main(void) {
             set_led(i, 0, INTENSITY, 0, 0);
         }
         TX_64LEDS();
-        LATC = 0x00;             // temoin PORTC
         __delay_ms(1000);
     }
 #endif

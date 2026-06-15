@@ -34,22 +34,26 @@ _TX_64LEDS:
     MOVF POSTINC0, 0, 0
     MOVWF TABLAT, 0
 
+    ; Selectionne la banque de LATB UNE fois (hors boucle -> 0 impact timing).
+    ; Robuste meme si LATB n'est PAS dans la banque d'acces (cas du K40).
+    ; Les BSF/BCF LATB utilisent ensuite ',1' (acces via BSR).
+    BANKSEL LATB
 _byte_loop:
 
     ; =========================================================
     ; BIT 7
     ; =========================================================
-    BSF LATB, 5, 0      ; [1] Cycle 1
+    BSF LATB, 5, 1      ; [1] Cycle 1
     RLCF TABLAT, 1, 0   ; [1] Cycle 2
     BTFSS STATUS, 0, 0  ; [1/2] Cycle 3
     BRA _b7_0           ; [2]
 _b7_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [9] Cycles 5-13
-    BCF LATB, 5, 0      ; [1] Cycle 14
+    BCF LATB, 5, 1      ; [1] Cycle 14
     NOP; NOP; NOP; NOP  ; [4] Cycles 15-18
     BRA _b6_start       ; [2] Cycles 19-20
 _b7_0:
-    BCF LATB, 5, 0      ; [1] Cycle 6
+    BCF LATB, 5, 1      ; [1] Cycle 6
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [14] Cycles 7-20
     ; Le code "tombe" dans _b6_start au cycle 21 (= cycle 1 du bit suivant)
 
@@ -57,115 +61,115 @@ _b6_start:
     ; =========================================================
     ; BIT 6
     ; =========================================================
-    BSF LATB, 5, 0      ; [1] Cycle 1
+    BSF LATB, 5, 1      ; [1] Cycle 1
     RLCF TABLAT, 1, 0   ; [1] Cycle 2
     BTFSS STATUS, 0, 0  ; [1/2] Cycle 3
     BRA _b6_0           ; [2]
 _b6_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [9] Cycles 5-13
-    BCF LATB, 5, 0      ; [1] Cycle 14
+    BCF LATB, 5, 1      ; [1] Cycle 14
     NOP; NOP; NOP; NOP  ; [4] Cycles 15-18
     BRA _b5_start       ; [2] Cycles 19-20
 _b6_0:
-    BCF LATB, 5, 0      ; [1] Cycle 6
+    BCF LATB, 5, 1      ; [1] Cycle 6
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [14] Cycles 7-20
 
 _b5_start:
     ; =========================================================
     ; BIT 5
     ; =========================================================
-    BSF LATB, 5, 0
+    BSF LATB, 5, 1
     RLCF TABLAT, 1, 0
     BTFSS STATUS, 0, 0
     BRA _b5_0
 _b5_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP
     BRA _b4_start
 _b5_0:
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b4_start:
     ; =========================================================
     ; BIT 4
     ; =========================================================
-    BSF LATB, 5, 0
+    BSF LATB, 5, 1
     RLCF TABLAT, 1, 0
     BTFSS STATUS, 0, 0
     BRA _b4_0
 _b4_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP
     BRA _b3_start
 _b4_0:
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b3_start:
     ; =========================================================
     ; BIT 3
     ; =========================================================
-    BSF LATB, 5, 0
+    BSF LATB, 5, 1
     RLCF TABLAT, 1, 0
     BTFSS STATUS, 0, 0
     BRA _b3_0
 _b3_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP
     BRA _b2_start
 _b3_0:
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b2_start:
     ; =========================================================
     ; BIT 2
     ; =========================================================
-    BSF LATB, 5, 0
+    BSF LATB, 5, 1
     RLCF TABLAT, 1, 0
     BTFSS STATUS, 0, 0
     BRA _b2_0
 _b2_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP
     BRA _b1_start
 _b2_0:
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b1_start:
     ; =========================================================
     ; BIT 1
     ; =========================================================
-    BSF LATB, 5, 0
+    BSF LATB, 5, 1
     RLCF TABLAT, 1, 0
     BTFSS STATUS, 0, 0
     BRA _b1_0
 _b1_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP
     BRA _b0_start
 _b1_0:
-    BCF LATB, 5, 0
+    BCF LATB, 5, 1
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
 
 _b0_start:
     ; =========================================================
     ; BIT 0 - LE BIT INTELLIGENT (CHARGEMENT DE L'OCTET SUIVANT)
     ; =========================================================
-    BSF LATB, 5, 0      ; [1] Cycle 1
+    BSF LATB, 5, 1      ; [1] Cycle 1
     RLCF TABLAT, 1, 0   ; [1] Cycle 2
     BTFSS STATUS, 0, 0  ; [1/2] Cycle 3
     BRA _b0_0           ; [2]
 _b0_1:
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [9] Cycles 5-13
-    BCF LATB, 5, 0      ; [1] Cycle 14
+    BCF LATB, 5, 1      ; [1] Cycle 14
     
     ; -- On profite de l'état BAS pour recharger WREG et TABLAT ! --
     MOVF POSTINC0, 0, 0 ; [1] Cycle 15
@@ -176,7 +180,7 @@ _b0_1:
     RETURN              ; Si c'était le dernier octet (Z=1), on quitte la fonction.
 
 _b0_0:
-    BCF LATB, 5, 0      ; [1] Cycle 6
+    BCF LATB, 5, 1      ; [1] Cycle 6
     NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [8] Cycles 7-14
     
     ; -- Même gymnastique de chargement pour le chemin "0" --
@@ -197,7 +201,7 @@ _next_byte:
 
 _bit_loop:
     ; --- DEBUT DU BIT (Total : 20 cycles = 1,25 µs) ---
-    BSF LATB, 5, 0      ; [1 cycle]  BROCHE A L'ETAT HAUT (RB5 = CMD_MATRIX)
+    BSF LATB, 5, 1      ; [1 cycle]  BROCHE A L'ETAT HAUT (RB5 = CMD_MATRIX)
     RLCF TABLAT, 1, 0   ; [1 cycle]  Décale l'octet vers la gauche. Le bit fort tombe dans le Carry (C)
     BTFSS STATUS, 0, 0  ; [1 ou 2]   Teste le Carry. Si C=1, on saute la ligne suivante.
     BRA _bit_is_zero    ; [2 cycles] Si C=0, on part vers le code du bit "0"
@@ -214,7 +218,7 @@ _bit_is_one:
     NOP                 ; [11]
     NOP                 ; [12]
     NOP                 ; [13]
-    BCF LATB, 5, 0      ; [1 cycle] (Cycle 14) BROCHE A L'ETAT BAS
+    BCF LATB, 5, 1      ; [1 cycle] (Cycle 14) BROCHE A L'ETAT BAS
     
     ; La broche doit rester BASSE pendant 7 cycles (pour atteindre 20)
     NOP                 ; [15]
@@ -227,7 +231,7 @@ _bit_is_one:
 _bit_is_zero:
     ; Si on est ici, on est au cycle 6 (car le saut BRA a pris 2 cycles). 
     ; Pour un "0", la broche doit être HAUTE pendant 5 cycles. C'est le moment de la baisser !
-    BCF LATB, 5, 0      ; [1 cycle] (Cycle 6) BROCHE A L'ETAT BAS
+    BCF LATB, 5, 1      ; [1 cycle] (Cycle 6) BROCHE A L'ETAT BAS
     
     ; La broche doit rester BASSE pendant 15 cycles (pour atteindre 20)
     NOP                 ; [7]
