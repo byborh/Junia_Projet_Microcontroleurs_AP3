@@ -204,26 +204,36 @@ void main(void) {
 
     /* ========================================================================
      *  === TEST MATRICE (mettre TEST_MATRIX a 0 pour repasser au vumetre) ===
-     *  Allume TOUTES les LEDs en VERT pendant 1 s, puis tout eteint 1 s, en boucle.
+     *  Allume TEST_NLEDS LEDs avec la couleur (G,R,B,W) ci-dessous pendant 1 s,
+     *  puis tout eteint pendant 1 s, en boucle.
      *
-     *  Lecture du resultat :
-     *   - 64 LEDs VERTES qui s'allument/eteignent ensemble, proprement :
-     *       => transmission + timing ASM OK. Le bug est EN AMONT
-     *          (ADC / build_frame / signal audio).
-     *   - Blanc, mauvaise couleur, nombre partiel (~55%) ou scintillement :
-     *       => le probleme est dans tx.asm (timing des impulsions / nb d'octets).
+     *  La LED master (RB4) suit EXACTEMENT le meme rythme -> sert a VERIFIER
+     *  L'HORLOGE au chronometre : elle doit faire 1 s ON / 1 s OFF (periode 2 s).
+     *  Si la periode mesuree n'est pas 2 s, l'horloge n'est pas a 64 MHz et tout
+     *  le timing du protocole est faux (cause possible du "blanc").
+     *
+     *  Reglages rapides (a changer "a la volee") :
+     *    TEST_NLEDS   : nombre de LEDs allumees (1 = ne teste que la 1ere LED)
+     *    TEST_G/R/B/W : composantes couleur (jamais 255 ; ~16-32)
      * ====================================================================== */
 #define TEST_MATRIX 1
+#define TEST_NLEDS  NB_LEDS     // 64 ; mettre 1 pour n'allumer que la 1ere LED
+#define TEST_G      0           // vert  (0 = test SANS vert)
+#define TEST_R      INTENSITY   // rouge
+#define TEST_B      0           // bleu
+#define TEST_W      0           // blanc
 #if TEST_MATRIX
     while (1) {
-        for (uint8_t i = 0; i < NB_LEDS; i++) {
-            set_led(i, INTENSITY, 0, 0, 0);   // tout en vert (1 seul canal -> test net)
+        for (uint8_t i = 0; i < TEST_NLEDS; i++) {
+            set_led(i, TEST_G, TEST_R, TEST_B, TEST_W);
         }
         TX_64LEDS();
+        LED_M_ON();              // LED master ON pendant la phase "allume"
         __delay_ms(1000);
 
-        clear_matrix();                        // tout eteint
+        clear_matrix();
         TX_64LEDS();
+        LED_M_OFF();             // LED master OFF pendant la phase "eteint"
         __delay_ms(1000);
     }
 #endif
