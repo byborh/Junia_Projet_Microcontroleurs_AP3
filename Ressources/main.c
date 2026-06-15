@@ -236,17 +236,22 @@ void main(void) {
 #endif
 
 #if TEST_MATRIX
-    // Motif de diagnostic : 4 couleurs distinctes sur les 4 premieres LEDs,
-    // tout le reste eteint. On regarde COMMENT ca s'affiche.
-    clear_matrix();
-    set_led(0, 0,         INTENSITY, 0,         0);          // LED 0 = ROUGE
-    set_led(1, INTENSITY, 0,         0,         0);          // LED 1 = VERT
-    set_led(2, 0,         0,         INTENSITY, 0);          // LED 2 = BLEU
-    set_led(3, 0,         0,         0,         INTENSITY);  // LED 3 = BLANC
+    // Test decisif : la matrice REAGIT-ELLE a nos donnees ?
+    // On alterne TOUT ETEINT <-> TOUT ROUGE chaque seconde.
     while (1) {
-        TX_64LEDS();             // renvoie la meme trame en continu
-        LATC ^= 0xFF;            // PORTC clignote = preuve que la boucle tourne
-        __delay_ms(500);
+        // Phase A : TOUT ETEINT (on envoie des zeros)
+        clear_matrix();
+        TX_64LEDS();
+        LATC = 0xFF;             // temoin PORTC
+        __delay_ms(1000);
+
+        // Phase B : TOUT ROUGE
+        for (uint8_t i = 0; i < NB_LEDS; i++) {
+            set_led(i, 0, INTENSITY, 0, 0);
+        }
+        TX_64LEDS();
+        LATC = 0x00;             // temoin PORTC
+        __delay_ms(1000);
     }
 #endif
 
