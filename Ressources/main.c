@@ -24,9 +24,14 @@
 #define BAR_HEIGHT 8
 #define INTENSITY  24   // jamais 255 ! (~16-32)
 
-// Valeur ADC au REPOS (silence) a soustraire pour que le vumetre parte de 0.
-// A AJUSTER : augmente si ca reste allume au silence ; baisse si trop peu sensible.
+// Plage utile de l'ADC mappee sur les 8 niveaux :
+//   NOISE_FLOOR = valeur au REPOS (silence) -> barre a 0
+//   SIGNAL_MAX  = valeur au son FORT         -> barre au max (rouge)
+// A AJUSTER : si ca ne monte jamais au rouge -> BAISSE SIGNAL_MAX (+ de gain).
+//             si ca sature trop vite          -> AUGMENTE SIGNAL_MAX.
+//             si ca reste allume au silence    -> AUGMENTE NOISE_FLOOR.
 #define NOISE_FLOOR 350
+#define SIGNAL_MAX  600
 
 // Ordre des octets en memoire = ordre d'envoi : G, R, B, W
 #define OFF_G 0
@@ -61,9 +66,10 @@ static uint16_t adc_read(uint8_t ch) {
 
 static uint8_t adc_to_level(uint16_t v) {
     if (v <= NOISE_FLOOR) return 0;                  // silence -> barre a 0
-    uint16_t span = (uint16_t)(v - NOISE_FLOOR);     // partie utile du signal
-    uint8_t lvl = (uint8_t)(((uint32_t)span * (BAR_HEIGHT + 1u)) / (1024u - NOISE_FLOOR));
-    if (lvl > BAR_HEIGHT) lvl = BAR_HEIGHT;
+    uint16_t span  = (uint16_t)(v - NOISE_FLOOR);    // partie utile du signal
+    uint16_t range = (uint16_t)(SIGNAL_MAX - NOISE_FLOOR);
+    uint8_t lvl = (uint8_t)(((uint32_t)span * (BAR_HEIGHT + 1u)) / range);
+    if (lvl > BAR_HEIGHT) lvl = BAR_HEIGHT;          // sature au max (rouge)
     return lvl;
 }
 
