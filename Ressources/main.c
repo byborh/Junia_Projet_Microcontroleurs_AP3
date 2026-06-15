@@ -224,17 +224,18 @@ void main(void) {
 #define TEST_W      0           // blanc
 #if TEST_MATRIX
     while (1) {
+        // Prepare la trame (rouge sur TEST_NLEDS LEDs)
         for (uint8_t i = 0; i < TEST_NLEDS; i++) {
             set_led(i, TEST_G, TEST_R, TEST_B, TEST_W);
         }
-        TX_64LEDS();
-        LED_M_ON();              // LED master ON pendant la phase "allume"
-        __delay_ms(1000);
 
-        clear_matrix();
-        TX_64LEDS();
-        LED_M_OFF();             // LED master OFF pendant la phase "eteint"
-        __delay_ms(1000);
+        LATC = 0xFF;             // PORTC ALLUME  (= "j'entre dans TX")
+        __delay_ms(500);         // visible 500 ms -> sert AUSSI a chronometrer l'horloge
+
+        TX_64LEDS();             // envoi a la matrice
+
+        LATC = 0x00;             // PORTC ETEINT  (= "TX a RENDU la main")
+        __delay_ms(500);
     }
 #endif
 
