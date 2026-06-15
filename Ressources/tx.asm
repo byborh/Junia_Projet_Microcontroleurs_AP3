@@ -19,10 +19,13 @@ psect   txfunc,local,class=CODE,reloc=2 ; PIC18's should have a reloc (alignment
 global _TX_64LEDS ; Fonction définie dans tx.asm ; Fonction permettant d'envoyer la commande pour piloter les 64 LEDs, telle que décrite dans LED_MATRIX
 
 ; Constantes/variables globales
+global _pC         ; Constante définie dans main.c ; Pointeur vers LED_MATRIX (= &LED_MATRIX, calcule par le C)
 global _LED_MATRIX ; Variable  définie dans main.c ; Tableau (256 octets = 64 x 4) des composantes RGBW de la matrice LED (1 octet/couleur/LED)
 
 _TX_64LEDS:
-    LFSR 0, _LED_MATRIX   ; Charge directement l'adresse 16-bits du tableau dans FSR0
+    ; Charge FSR0 depuis le pointeur pC (adresse de LED_MATRIX fournie par le C)
+    MOVFF _pC + 0, FSR0L  ; LSB de l'adresse
+    MOVFF _pC + 1, FSR0H  ; MSB de l'adresse
 
     ; Initialisation
     CLRF PRODL, 0       ; Compteur d'octets (débordera à 255 -> 256 itérations)
