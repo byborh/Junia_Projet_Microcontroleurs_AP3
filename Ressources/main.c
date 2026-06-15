@@ -26,7 +26,7 @@
 
 // Valeur ADC au REPOS (silence) a soustraire pour que le vumetre parte de 0.
 // A AJUSTER : augmente si ca reste allume au silence ; baisse si trop peu sensible.
-#define NOISE_FLOOR 400
+#define NOISE_FLOOR 350
 
 // Ordre des octets en memoire = ordre d'envoi : G, R, B, W
 #define OFF_G 0
