@@ -217,7 +217,7 @@ void main(void) {
      *    TEST_G/R/B/W : composantes couleur (jamais 255 ; ~16-32)
      * ====================================================================== */
 #define TEST_MATRIX 1
-#define TEST_NLEDS  NB_LEDS     // 64 ; mettre 1 pour n'allumer que la 1ere LED
+#define TEST_NLEDS  1           // T2 : on n'allume QUE la 1ere LED (rouge)
 #define TEST_G      0           // vert  (0 = test SANS vert)
 #define TEST_R      INTENSITY   // rouge
 #define TEST_B      0           // bleu
