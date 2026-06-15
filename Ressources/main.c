@@ -88,12 +88,11 @@ static void     set_led_by_height(uint8_t idx, uint8_t row);
 
 // Lit un canal ADC, retourne 0..1023
 static uint16_t adc_read(uint8_t channel) {
-    ADPCH = channel;        // selection du canal
-    __delay_us(5);          // temps d'acquisition (charge du S&H)
-    ADCON0 |= 0x01;         // ADGO = 1 : demarre la conversion
-    while (ADCON0 & 0x01) { // attend la fin (ADGO repasse a 0)
-        ;
-    }
+    ADPCH = channel;
+    __delay_us(5);
+    ADCON0bits.ADGO = 1;          // démarre la conversion (bit 1 !)
+    NOP();                        // voir note ci-dessous
+    while (ADCON0bits.ADGO) { ; } // ADGO repasse à 0 en fin de conversion
     return (uint16_t)(((uint16_t)ADRESH << 8) | ADRESL);
 }
 
@@ -181,7 +180,10 @@ void main(void) {
 
     // --- Module ADC ---
     // ADCON0 : ADON=1 (b7) | ADCS=1 (b4, horloge FRC dediee) | ADFM=1 (b2, justifie a droite)
-    ADCON0 = 0x80 | 0x10 | 0x04;   // = 0x94
+    // ADCON0 = 0x80 | 0x10 | 0x04;   // = 0x94
+    ADCON0bits.ADON = 1;   // ON
+    ADCON0bits.ADCS = 1;   // horloge FRC dédiée
+    ADCON0bits.ADFM = 1;   // justifié à droite (bit 0)
     // ADREF par defaut : Vref+ = VDD, Vref- = VSS
     ADREF  = 0x00;
     // Pas d'acquisition automatique : on attend manuellement avant chaque conversion
@@ -195,21 +197,36 @@ void main(void) {
     LED_M_OFF(); __delay_ms(200);
     LED_M_ON();
 
-// TODO: à supprimer plus tard, mais ça permet juste de vérifier si ça fonctionne ou non.
-#define DEMO_TEST 1
-#if DEMO_TEST
-    while (1) {
-        for (int i = 0; i < 8; i++) {
-            LATC = (unsigned char)(0x01 << i);   // allume LED i sur PORTC
-            __delay_ms(125);
-        }
-    }
-#endif
-
-
     /* Affichage matrice eteinte au depart */
     clear_matrix();
     TX_64LEDS();
+
+
+    /* ========================================================================
+     *  === TEST MATRICE (mettre TEST_MATRIX a 0 pour repasser au vumetre) ===
+     *  Allume TOUTES les LEDs en VERT pendant 1 s, puis tout eteint 1 s, en boucle.
+     *
+     *  Lecture du resultat :
+     *   - 64 LEDs VERTES qui s'allument/eteignent ensemble, proprement :
+     *       => transmission + timing ASM OK. Le bug est EN AMONT
+     *          (ADC / build_frame / signal audio).
+     *   - Blanc, mauvaise couleur, nombre partiel (~55%) ou scintillement :
+     *       => le probleme est dans tx.asm (timing des impulsions / nb d'octets).
+     * ====================================================================== */
+#define TEST_MATRIX 1
+#if TEST_MATRIX
+    while (1) {
+        for (uint8_t i = 0; i < NB_LEDS; i++) {
+            set_led(i, INTENSITY, 0, 0, 0);   // tout en vert (1 seul canal -> test net)
+        }
+        TX_64LEDS();
+        __delay_ms(1000);
+
+        clear_matrix();                        // tout eteint
+        TX_64LEDS();
+        __delay_ms(1000);
+    }
+#endif
 
 
     /* Corps du programme : boucle vumetre ------------------------------------ */
@@ -226,6 +243,10 @@ void main(void) {
         level[1] = adc_to_level(v_bas_med);
         level[2] = adc_to_level(v_haut_med);
         level[3] = adc_to_level(v_aigus);
+
+        // --- DEBUG : niveau "basses" en barre sur les 8 LEDs PORTC ---
+        uint8_t n = level[0];                       // 0..8
+        LATC = (n >= 8) ? 0xFF : (uint8_t)((1u << n) - 1u);
 
         // 3) Construction de la trame puis envoi a la matrice (ASM)
         build_frame(level);

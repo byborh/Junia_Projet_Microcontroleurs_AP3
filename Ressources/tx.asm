@@ -19,29 +19,173 @@ psect   txfunc,local,class=CODE,reloc=2 ; PIC18's should have a reloc (alignment
 global _TX_64LEDS ; Fonction définie dans tx.asm ; Fonction permettant d'envoyer la commande pour piloter les 64 LEDs, telle que décrite dans LED_MATRIX
 
 ; Constantes/variables globales
-global _pC         ; Constante définie dans main.c ; Pointeur vers LED_MATRIX
 global _LED_MATRIX ; Variable  définie dans main.c ; Tableau (256 octets = 64 x 4) des composantes RGBW de la matrice LED (1 octet/couleur/LED)
 
 _TX_64LEDS:
-    ; Cette fonction envoie sur CMD_MATRIX l'intégralité de la matrice LED_MATRIX,
-    ; Chaque bit de chaque octet encodé en largeur d'impulsion
+    LFSR 0, _LED_MATRIX   ; Charge directement l'adresse 16-bits du tableau dans FSR0
 
-    ; Place un pointeur au début de la matrice LED_MATRIX
-    ; Voir section 10.8.12 (p. 150) de la datasheet PIC18F25K40
-    MOVFF _pC + 0, WREG ; Charge le LSB du pointeur de LED_MATRIX dans WREG
-    MOVWF FSR0L, 0      ; Définit le LSB du registre d'adressage indirect
-    MOVFF _pC + 1, WREG ; Charge le MSB du pointeur de LED_MATRIX dans WREG
-    MOVWF FSR0H, 0      ; Définit le MSB du registre d'adressage indirect
+    ; Initialisation
+    CLRF PRODL, 0       ; Compteur d'octets (débordera à 255 -> 256 itérations)
 
-    ; Désormais, dès l'exécution de l'instruction suivante, la valeur pointée par <FSR0H-FSR0L> est chargée dans WREG, et <FSR0H-FSR0L> est incrémenté :
-    ; MOVF POSTINC0, 0, 0
+    ; Chargement du tout premier octet avant de lancer le chronomètre
+    MOVF POSTINC0, 0, 0
+    MOVWF TABLAT, 0
 
-    ; Envoie la commande pour piloter chacune des 64 LEDs (256 octets)
+_byte_loop:
 
-    ; 1. Initialisation des compteurs
-    ; On utilise des registres systèmes libres (PRODL, PRODH, TABLAT) pour ne pas gêner le compilateur C
-    CLRF PRODL, 0       ; PRODL sera notre compteur d'octets. Init à 0 (bouclera 256 fois)
+    ; =========================================================
+    ; BIT 7
+    ; =========================================================
+    BSF LATB, 5, 0      ; [1] Cycle 1
+    RLCF TABLAT, 1, 0   ; [1] Cycle 2
+    BTFSS STATUS, 0, 0  ; [1/2] Cycle 3
+    BRA _b7_0           ; [2]
+_b7_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [9] Cycles 5-13
+    BCF LATB, 5, 0      ; [1] Cycle 14
+    NOP; NOP; NOP; NOP  ; [4] Cycles 15-18
+    BRA _b6_start       ; [2] Cycles 19-20
+_b7_0:
+    BCF LATB, 5, 0      ; [1] Cycle 6
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [12] Cycles 7-18
+    ; Le code "tombe" directement dans _b6_start (Cycles 19-20 implicites)
 
+_b6_start:
+    ; =========================================================
+    ; BIT 6
+    ; =========================================================
+    BSF LATB, 5, 0      ; [1] Cycle 1
+    RLCF TABLAT, 1, 0   ; [1] Cycle 2
+    BTFSS STATUS, 0, 0  ; [1/2] Cycle 3
+    BRA _b6_0           ; [2]
+_b6_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [9] Cycles 5-13
+    BCF LATB, 5, 0      ; [1] Cycle 14
+    NOP; NOP; NOP; NOP  ; [4] Cycles 15-18
+    BRA _b5_start       ; [2] Cycles 19-20
+_b6_0:
+    BCF LATB, 5, 0      ; [1] Cycle 6
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [12] Cycles 7-18
+
+_b5_start:
+    ; =========================================================
+    ; BIT 5
+    ; =========================================================
+    BSF LATB, 5, 0
+    RLCF TABLAT, 1, 0
+    BTFSS STATUS, 0, 0
+    BRA _b5_0
+_b5_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP
+    BRA _b4_start
+_b5_0:
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+
+_b4_start:
+    ; =========================================================
+    ; BIT 4
+    ; =========================================================
+    BSF LATB, 5, 0
+    RLCF TABLAT, 1, 0
+    BTFSS STATUS, 0, 0
+    BRA _b4_0
+_b4_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP
+    BRA _b3_start
+_b4_0:
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+
+_b3_start:
+    ; =========================================================
+    ; BIT 3
+    ; =========================================================
+    BSF LATB, 5, 0
+    RLCF TABLAT, 1, 0
+    BTFSS STATUS, 0, 0
+    BRA _b3_0
+_b3_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP
+    BRA _b2_start
+_b3_0:
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+
+_b2_start:
+    ; =========================================================
+    ; BIT 2
+    ; =========================================================
+    BSF LATB, 5, 0
+    RLCF TABLAT, 1, 0
+    BTFSS STATUS, 0, 0
+    BRA _b2_0
+_b2_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP
+    BRA _b1_start
+_b2_0:
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+
+_b1_start:
+    ; =========================================================
+    ; BIT 1
+    ; =========================================================
+    BSF LATB, 5, 0
+    RLCF TABLAT, 1, 0
+    BTFSS STATUS, 0, 0
+    BRA _b1_0
+_b1_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP
+    BRA _b0_start
+_b1_0:
+    BCF LATB, 5, 0
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP
+
+_b0_start:
+    ; =========================================================
+    ; BIT 0 - LE BIT INTELLIGENT (CHARGEMENT DE L'OCTET SUIVANT)
+    ; =========================================================
+    BSF LATB, 5, 0      ; [1] Cycle 1
+    RLCF TABLAT, 1, 0   ; [1] Cycle 2
+    BTFSS STATUS, 0, 0  ; [1/2] Cycle 3
+    BRA _b0_0           ; [2]
+_b0_1:
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [9] Cycles 5-13
+    BCF LATB, 5, 0      ; [1] Cycle 14
+    
+    ; -- On profite de l'état BAS pour recharger WREG et TABLAT ! --
+    MOVF POSTINC0, 0, 0 ; [1] Cycle 15
+    MOVWF TABLAT, 0     ; [1] Cycle 16
+    NOP                 ; [1] Cycle 17
+    DECF PRODL, 1, 0    ; [1] Cycle 18 (Décrémente le compteur d'octets)
+    BNZ _byte_loop      ; [2] Cycles 19-20 (Si != 0, remonte en haut !)
+    RETURN              ; Si c'était le dernier octet (Z=1), on quitte la fonction.
+
+_b0_0:
+    BCF LATB, 5, 0      ; [1] Cycle 6
+    NOP; NOP; NOP; NOP; NOP; NOP; NOP; NOP ; [8] Cycles 7-14
+    
+    ; -- Même gymnastique de chargement pour le chemin "0" --
+    MOVF POSTINC0, 0, 0 ; [1] Cycle 15
+    MOVWF TABLAT, 0     ; [1] Cycle 16
+    NOP                 ; [1] Cycle 17
+    DECF PRODL, 1, 0    ; [1] Cycle 18 (Décrémente le compteur d'octets)
+    BNZ _byte_loop      ; [2] Cycles 19-20
+    
+    RETURN              ; Fin de la matrice !
+
+    
 _next_byte:
     MOVF POSTINC0, 0, 0 ; WREG = charge l'octet actuel et incrémente le pointeur (1 cycle)
     MOVWF TABLAT, 0     ; TABLAT = copie l'octet à envoyer ici (notre zone de travail)
